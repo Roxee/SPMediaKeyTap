@@ -22,7 +22,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 
 #pragma mark -
 #pragma mark Setup and teardown
--(id)initWithDelegate:(id)delegate;
+-(id)initWithDelegate:(id)delegate
 {
 	_delegate = delegate;
 	[self startWatchingAppSwitching];
@@ -33,7 +33,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
     _eventPortSource=nil;
 	return self;
 }
--(void)dealloc;
+-(void)dealloc
 {
 	[self stopWatchingMediaKeys];
 	[self stopWatchingAppSwitching];
@@ -41,7 +41,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 	[super dealloc];
 }
 
--(void)startWatchingAppSwitching;
+-(void)startWatchingAppSwitching
 {
 	// Listen to "app switched" event, so that we don't intercept media keys if we
 	// weren't the last "media key listening" app to be active
@@ -53,14 +53,14 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
     err = InstallApplicationEventHandler(NewEventHandlerUPP(appTerminated), 1, &eventType, self, &_app_terminating_ref);
 	assert(err == noErr);
 }
--(void)stopWatchingAppSwitching;
+-(void)stopWatchingAppSwitching
 {
 	if(!_app_switching_ref) return;
 	RemoveEventHandler(_app_switching_ref);
 	_app_switching_ref = NULL;
 }
 
--(void)startWatchingMediaKeys;{
+-(void)startWatchingMediaKeys{
     // Prevent having multiple mediaKeys threads
     [self stopWatchingMediaKeys];
     
@@ -81,7 +81,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 	// Let's do this in a separate thread so that a slow app doesn't lag the event tap
 	[NSThread detachNewThreadSelector:@selector(eventTapThread) toTarget:self withObject:nil];
 }
--(void)stopWatchingMediaKeys;
+-(void)stopWatchingMediaKeys
 {
 	// TODO<nevyn>: Shut down thread, remove event tap port and source
     
@@ -118,7 +118,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 #endif
 }
 
-+ (NSArray*)defaultMediaKeyUserBundleIdentifiers;
++ (NSArray*)defaultMediaKeyUserBundleIdentifiers
 {
 	return [NSArray arrayWithObjects:
 		[[NSBundle mainBundle] bundleIdentifier], // your app
@@ -159,7 +159,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 }
 
 
--(BOOL)shouldInterceptMediaKeyEvents;
+-(BOOL)shouldInterceptMediaKeyEvents
 {
 	BOOL shouldIntercept = NO;
 	@synchronized(self) {
@@ -168,11 +168,11 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 	return shouldIntercept;
 }
 
--(void)pauseTapOnTapThread:(BOOL)yeahno;
+-(void)pauseTapOnTapThread:(BOOL)yeahno
 {
 	CGEventTapEnable(self->_eventPort, yeahno);
 }
--(void)setShouldInterceptMediaKeyEvents:(BOOL)newSetting;
+-(void)setShouldInterceptMediaKeyEvents:(BOOL)newSetting
 {
 	BOOL oldSetting;
 	@synchronized(self) {
@@ -195,7 +195,8 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 
 static CGEventRef tapEventCallback2(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-	SPMediaKeyTap *self = refcon;
+    #pragma unused (proxy)
+    SPMediaKeyTap *self = refcon;
 
     if(type == kCGEventTapDisabledByTimeout) {
 		NSLog(@"Media key event tap was disabled by timeout");
@@ -248,7 +249,7 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 }
 
 
--(void)eventTapThread;
+-(void)eventTapThread
 {
 	_tapThreadRL = CFRunLoopGetCurrent();
 	CFRunLoopAddSource(_tapThreadRL, _eventPortSource, kCFRunLoopCommonModes);
@@ -262,7 +263,7 @@ NSString *kIgnoreMediaKeysDefaultsKey = @"SPIgnoreMediaKeys";
 
 
 
--(void)mediaKeyAppListChanged;
+-(void)mediaKeyAppListChanged
 {
 	if([_mediaKeyAppList count] == 0) return;
 	
@@ -287,7 +288,7 @@ NSString *kIgnoreMediaKeysDefaultsKey = @"SPIgnoreMediaKeys";
 	[self setShouldInterceptMediaKeyEvents:(err == noErr && same)];	
 
 }
--(void)appIsNowFrontmost:(ProcessSerialNumber)psn;
+-(void)appIsNowFrontmost:(ProcessSerialNumber)psn
 {
 	NSValue *psnv = [NSValue valueWithBytes:&psn objCType:@encode(ProcessSerialNumber)];
 	
@@ -304,7 +305,7 @@ NSString *kIgnoreMediaKeysDefaultsKey = @"SPIgnoreMediaKeys";
 	[_mediaKeyAppList insertObject:psnv atIndex:0];
 	[self mediaKeyAppListChanged];
 }
--(void)appTerminated:(ProcessSerialNumber)psn;
+-(void)appTerminated:(ProcessSerialNumber)psn
 {
 	NSValue *psnv = [NSValue valueWithBytes:&psn objCType:@encode(ProcessSerialNumber)];
 	[_mediaKeyAppList removeObject:psnv];
