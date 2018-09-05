@@ -152,8 +152,9 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 		@"com.beardedspice.BeardedSpice",
 		@"com.plug.Plug",
 		@"com.plug.Plug2",
-    @"com.netease.163music",
+		@"com.netease.163music",
     		@"org.quodlibet.quodlibet",
+    		@"com.dubo.platipus",
 		nil
 	];
 }
