@@ -73,6 +73,9 @@ static CGEventRef tapEventCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 								  CGEventMaskBit(NX_SYSDEFINED),
 								  tapEventCallback,
 								  self);
+	// If the user does not authorize accessibility control request, bail out
+	if (_eventPort == NULL)
+		return;
 	assert(_eventPort != NULL);
 	
     _eventPortSource = CFMachPortCreateRunLoopSource(kCFAllocatorSystemDefault, _eventPort, 0);
